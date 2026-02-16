@@ -123,3 +123,14 @@ The application achieves real-time synchronization using Supabase's Realtime cap
 ### 5. Double Loading Spinners
 - **Problem**: Authenticating with Google showed two loading spinners simultaneously—one inside the `Button` component (which auto-detects `disabled` state) and another manually rendered in the `LoginPage`.
 - **Solution**: Refactored the `Button` component to accept a dedicated `loading` prop and updated `LoginPage` to pass the loading state to the button instead of rendering a separate spinner.
+
+### 6. ESLint 9 vs eslint-config-next Version Conflict
+- **Problem**: Deployment failed on Vercel because `eslint-config-next@16` requires `eslint@^9`, but the project had `eslint@^8` installed.
+- **Solution**: Upgraded `eslint` to version `^9` in `package.json` to match the peer dependency requirement.
+
+### 7. Auth Redirect to Localhost in Production
+- **Problem**: After signing in on the deployed Vercel app, users were redirected to `localhost:3000`, causing a "Connection Refused" error.
+- **Solution**:
+    - Created a utility function `getURL()` that dynamically determines the site URL based on environment variables (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_VERCEL_URL`) or defaults to localhost only in development.
+    - Updated `app/login/page.jsx` to use this dynamic URL for the `redirectTo` parameter.
+    - Updated `app/auth/callback/route.js` to correctly handle `x-forwarded-host` headers for proper redirection behind Vercel's proxy.
