@@ -4,15 +4,17 @@ export const getURL = () => {
         process.env.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
         'http://localhost:3000/'
 
-    console.log('getURL debug:', {
-        NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-        NEXT_PUBLIC_VERCEL_URL: process.env.NEXT_PUBLIC_VERCEL_URL,
-        resolvedUrl: url
-    })
+    // If running on the client, prefer window.location.origin to ensure match
+    if (typeof window !== 'undefined' && window.location && window.location.origin) {
+        url = window.location.origin
+    }
 
     // Make sure to include `https://` when not localhost.
     url = url.includes('http') ? url : `https://${url}`
     // Make sure to include a trailing `/`.
     url = url.charAt(url.length - 1) === '/' ? url : `${url}/`
+
+    console.log('getURL resolved:', url)
+
     return url
 }
