@@ -62,7 +62,7 @@ export default function Home() {
                             <h1 className="text-4xl xs:text-5xl font-extrabold font-heading tracking-tighter sm:text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-shimmer bg-[length:200%_auto] drop-shadow-[0_0_15px_rgba(79,70,229,0.3)]">
                                 Bookmarks Reimagined.
                             </h1>
-                            <p className="mx-auto max-w-[700px] text-gray-600 text-base md:text-xl font-medium px-4">
+                            <p className="mx-auto max-w-[700px] text-gray-800 text-base md:text-xl font-semibold px-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">
                                 Sync your favorite sites instantly across all your devices.
                                 Secure, private, and beautifully designed.
                             </p>
