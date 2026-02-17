@@ -28,7 +28,7 @@ export default async function Dashboard() {
                             <div className="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20 text-white">
                                 <Bookmark className="h-6 w-6" />
                             </div>
-                            <h1 className="text-xl font-bold font-heading bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-700 hidden sm:block">
+                            <h1 className="text-xl font-bold font-heading bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-700 block">
                                 Smart Bookmarks
                             </h1>
                         </div>
