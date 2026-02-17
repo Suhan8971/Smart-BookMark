@@ -30,17 +30,17 @@ export default function Home() {
 
     return (
         <div className="flex min-h-screen flex-col font-sans">
-            <header className="px-6 h-16 flex items-center justify-between glass sticky top-0 z-50">
+            <header className="px-4 md:px-6 h-16 flex items-center justify-between glass sticky top-0 z-50">
                 <div className="flex items-center gap-2">
-                    <Bookmark className="h-6 w-6 text-indigo-600" />
-                    <span className="font-bold font-heading text-xl tracking-tight text-gray-900">Smart Bookmarks</span>
+                    <Bookmark className="h-6 w-6 text-indigo-600 shrink-0" />
+                    <span className="font-bold font-heading text-lg md:text-xl tracking-tight text-gray-900">Smart Bookmarks</span>
                 </div>
-                <nav className="flex gap-4">
-                    <Link href="/login">
+                <nav className="flex gap-2 md:gap-4">
+                    <Link href="/login" className="hidden sm:block">
                         <Button variant="ghost">Sign In</Button>
                     </Link>
                     <Link href="/login">
-                        <Button>Get Started</Button>
+                        <Button className="px-4 py-2 text-sm md:px-6 md:py-2 md:text-base">Get Started</Button>
                     </Link>
                 </nav>
             </header>
@@ -57,23 +57,23 @@ export default function Home() {
                     initial="hidden"
                     animate="visible"
                 >
-                    <div className="flex flex-col items-center space-y-8 text-center">
+                    <div className="flex flex-col items-center space-y-8 text-center pt-10 md:pt-0">
                         <motion.div variants={itemVariants} className="space-y-4">
-                            <h1 className="text-5xl font-extrabold font-heading tracking-tighter sm:text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-shimmer bg-[length:200%_auto] drop-shadow-[0_0_15px_rgba(79,70,229,0.3)]">
+                            <h1 className="text-4xl xs:text-5xl font-extrabold font-heading tracking-tighter sm:text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-shimmer bg-[length:200%_auto] drop-shadow-[0_0_15px_rgba(79,70,229,0.3)]">
                                 Bookmarks Reimagined.
                             </h1>
-                            <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl font-medium">
+                            <p className="mx-auto max-w-[700px] text-gray-600 text-base md:text-xl font-medium px-4">
                                 Sync your favorite sites instantly across all your devices.
                                 Secure, private, and beautifully designed.
                             </p>
                         </motion.div>
 
-                        <motion.div variants={itemVariants} className="flex gap-4">
-                            <Link href="/login">
-                                <Button className="px-8 py-6 text-lg rounded-full">Start for Free</Button>
+                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-6 sm:px-0">
+                            <Link href="/login" className="w-full sm:w-auto">
+                                <Button className="w-full sm:w-auto px-6 py-4 md:px-8 md:py-6 text-base md:text-lg rounded-full">Start for Free</Button>
                             </Link>
-                            <Link href="https://github.com" target="_blank">
-                                <Button variant="secondary" className="px-8 py-6 text-lg rounded-full">
+                            <Link href="https://github.com" target="_blank" className="w-full sm:w-auto">
+                                <Button variant="secondary" className="w-full sm:w-auto px-6 py-4 md:px-8 md:py-6 text-base md:text-lg rounded-full">
                                     View on GitHub
                                 </Button>
                             </Link>
