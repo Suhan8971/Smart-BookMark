@@ -3,7 +3,8 @@
 import { createClient } from '@/utils/supabase/client'
 import { getURL } from '@/utils/url'
 import { useState } from 'react'
-import { Loader2, Bookmark } from 'lucide-react'
+import { Loader2, Bookmark, ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { motion } from 'framer-motion'
@@ -27,6 +28,16 @@ export default function LoginPage() {
             {/* Background elements */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-400 rounded-full mix-blend-multiply filter blur-[120px] opacity-40 animate-blob"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-400 rounded-full mix-blend-multiply filter blur-[120px] opacity-40 animate-blob animation-delay-2000"></div>
+
+            {/* Back Button */}
+            <div className="absolute top-4 left-4 md:top-8 md:left-8 z-20">
+                <Link href="/">
+                    <Button variant="ghost" className="bg-white/50 backdrop-blur-sm hover:bg-white/80 text-gray-700">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Home
+                    </Button>
+                </Link>
+            </div>
 
             <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
