@@ -34,7 +34,7 @@ export default function LoginPage() {
                 <Link href="/">
                     <Button variant="ghost" className="bg-white/50 backdrop-blur-sm hover:bg-white/80 text-gray-700 text-xs px-3 py-2 md:text-sm md:px-4 h-auto">
                         <ArrowLeft className="mr-2 h-3 w-3 md:h-4 md:w-4" />
-                        Back to Home
+                        Back
                     </Button>
                 </Link>
             </div>
