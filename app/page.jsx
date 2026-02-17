@@ -59,7 +59,7 @@ export default function Home() {
                 >
                     <div className="flex flex-col items-center space-y-8 text-center">
                         <motion.div variants={itemVariants} className="space-y-4">
-                            <h1 className="text-5xl font-extrabold font-heading tracking-tighter sm:text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                            <h1 className="text-5xl font-extrabold font-heading tracking-tighter sm:text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-shimmer bg-[length:200%_auto] drop-shadow-[0_0_15px_rgba(79,70,229,0.3)]">
                                 Bookmarks Reimagined.
                             </h1>
                             <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl font-medium">
