@@ -26,6 +26,11 @@ export default function BookmarkManager({ initialBookmarks, userId }) {
     const [isAdding, setIsAdding] = useState(false)
     const [search, setSearch] = useState('')
 
+    // Sync state with props (Server Action revalidation)
+    useEffect(() => {
+        setBookmarks(initialBookmarks)
+    }, [initialBookmarks])
+
     // Realtime Subscription
     useEffect(() => {
         const channel = supabase
@@ -36,6 +41,7 @@ export default function BookmarkManager({ initialBookmarks, userId }) {
                 table: 'bookmarks',
                 filter: `user_id=eq.${userId}`
             }, (payload) => {
+                console.log('Realtime INSERT:', payload)
                 setBookmarks((prev) => {
                     if (prev.find(b => b.id === payload.new.id)) {
                         return prev
@@ -46,9 +52,12 @@ export default function BookmarkManager({ initialBookmarks, userId }) {
             .on('postgres_changes', {
                 event: 'DELETE',
                 schema: 'public',
-                table: 'bookmarks',
-                filter: `user_id=eq.${userId}`
+                table: 'bookmarks'
+                // Removed user_id filter for DELETE to check if that was blocking the event
+                // RLS should still protect data leakage if properly configured, 
+                // but usually DELETE payload only has ID, so filtering by user_id might fail if not in payload.
             }, (payload) => {
+                console.log('Realtime DELETE:', payload)
                 setBookmarks((prev) => prev.filter(b => b.id !== payload.old.id))
             })
             .subscribe()
