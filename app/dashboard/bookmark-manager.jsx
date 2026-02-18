@@ -11,7 +11,7 @@ import { cn } from '@/utils/cn'
 
 export default function BookmarkManager({ initialBookmarks, userId }) {
     const [bookmarks, setBookmarks] = useState(initialBookmarks)
-    const supabase = createClient()
+    const [supabase] = useState(() => createClient())
     const [url, setUrl] = useState('')
     const [title, setTitle] = useState('')
     const [isAdding, setIsAdding] = useState(false)
@@ -22,20 +22,25 @@ export default function BookmarkManager({ initialBookmarks, userId }) {
         const channel = supabase
             .channel('realtime bookmarks')
             .on('postgres_changes', {
-                event: '*',
+                event: 'INSERT',
                 schema: 'public',
                 table: 'bookmarks',
                 filter: `user_id=eq.${userId}`
             }, (payload) => {
-                if (payload.eventType === 'INSERT') {
-                    setBookmarks((prev) => {
-                        // Prevent duplicates if already added optimistically or by revalidation
-                        if (prev.some(b => b.id === payload.new.id)) return prev
-                        return [payload.new, ...prev]
-                    })
-                } else if (payload.eventType === 'DELETE') {
-                    setBookmarks((prev) => prev.filter(b => b.id !== payload.old.id))
-                }
+                setBookmarks((prev) => {
+                    if (prev.find(b => b.id === payload.new.id)) {
+                        return prev
+                    }
+                    return [payload.new, ...prev]
+                })
+            })
+            .on('postgres_changes', {
+                event: 'DELETE',
+                schema: 'public',
+                table: 'bookmarks',
+                filter: `user_id=eq.${userId}`
+            }, (payload) => {
+                setBookmarks((prev) => prev.filter(b => b.id !== payload.old.id))
             })
             .subscribe()
 
