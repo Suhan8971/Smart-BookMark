@@ -57,10 +57,16 @@ export default function BookmarkManager({ initialBookmarks, userId }) {
     }
 
     const handleDelete = async (id) => {
+        // Optimistic update
+        const previousBookmarks = bookmarks
+        setBookmarks(bookmarks.filter(b => b.id !== id))
+
         try {
             await deleteBookmark(id)
         } catch (error) {
             console.error('Failed to delete', error)
+            // Revert on failure
+            setBookmarks(previousBookmarks)
         }
     }
 
