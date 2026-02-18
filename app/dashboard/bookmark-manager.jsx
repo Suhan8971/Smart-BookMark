@@ -66,16 +66,16 @@ export default function BookmarkManager({ initialBookmarks, userId }) {
     }
 
     const handleDelete = async (id) => {
-        // Optimistic update
-        const previousBookmarks = bookmarks
-        setBookmarks(bookmarks.filter(b => b.id !== id))
+        // Optimistic update removed to rely on Realtime for cross-tab consistency
+        // const previousBookmarks = bookmarks
+        // setBookmarks(bookmarks.filter(b => b.id !== id))
 
         try {
             await deleteBookmark(id)
         } catch (error) {
             console.error('Failed to delete', error)
             // Revert on failure
-            setBookmarks(previousBookmarks)
+            // setBookmarks(previousBookmarks)
         }
     }
 
@@ -197,7 +197,7 @@ export default function BookmarkManager({ initialBookmarks, userId }) {
 
                                     <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-center">
                                         <span className="text-xs text-gray-400 font-medium bg-gray-50 px-2 py-1 rounded-full">
-                                            {new Date(bookmark.created_at).toLocaleDateString()}
+                                            {new Date(bookmark.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                                         </span>
                                         <a
                                             href={bookmark.url}
