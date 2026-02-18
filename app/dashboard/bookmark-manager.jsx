@@ -46,9 +46,16 @@ export default function BookmarkManager({ initialBookmarks, userId }) {
             }, (payload) => {
                 console.log('Realtime Event received:', payload)
 
+                // Debugging: Log IDs and types to catch mismatches
+                if (payload.new && payload.new.user_id) {
+                    console.log(`Checking INSERT: Payload UserID (${payload.new.user_id}) [${typeof payload.new.user_id}] vs Current UserID (${userId}) [${typeof userId}]`)
+                }
+
                 // Manual check to ensure we only process our own data
-                // (Note: RLS should already enforce this, but this is a safety double-check)
-                if (payload.new && payload.new.user_id && payload.new.user_id !== userId) return
+                if (payload.new && payload.new.user_id && payload.new.user_id !== userId) {
+                    console.warn('Blocked INSERT: User ID mismatch')
+                    return
+                }
                 if (payload.old && payload.old.user_id && payload.old.user_id !== userId) {
                     // For deletes, usually user_id isn't in payload.old unless table is REPLICA IDENTITY FULL
                     // So we might skip this check for deletes if strictly needed, 
@@ -56,13 +63,16 @@ export default function BookmarkManager({ initialBookmarks, userId }) {
                 }
 
                 if (payload.eventType === 'INSERT') {
+                    console.log('Processing INSERT event...')
                     setBookmarks((prev) => {
                         if (prev.find(b => b.id === payload.new.id)) {
+                            console.log('Duplicate bookmark ignored via ID check')
                             return prev
                         }
                         return [payload.new, ...prev]
                     })
                 } else if (payload.eventType === 'DELETE') {
+                    console.log('Processing DELETE event...')
                     setBookmarks((prev) => prev.filter(b => b.id !== payload.old.id))
                 }
             })
