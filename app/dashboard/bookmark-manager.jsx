@@ -9,6 +9,15 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/utils/cn'
 
+function ClientDate({ date }) {
+    const [mounted, setMounted] = useState(false)
+    useEffect(() => setMounted(true), [])
+
+    if (!mounted) return <span className="opacity-0">Loading...</span>
+
+    return <>{new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</>
+}
+
 export default function BookmarkManager({ initialBookmarks, userId }) {
     const [bookmarks, setBookmarks] = useState(initialBookmarks)
     const [supabase] = useState(() => createClient())
@@ -196,8 +205,9 @@ export default function BookmarkManager({ initialBookmarks, userId }) {
                                     </div>
 
                                     <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-center">
-                                        <span className="text-xs text-gray-400 font-medium bg-gray-50 px-2 py-1 rounded-full">
-                                            {new Date(bookmark.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                        <span className="text-xs text-gray-400 font-medium bg-gray-50 px-2 py-1 rounded-full min-h-[24px] min-w-[80px] inline-flex items-center justify-center">
+                                            {/* Date placeholder to prevent hydration mismatch */}
+                                            <ClientDate date={bookmark.created_at} />
                                         </span>
                                         <a
                                             href={bookmark.url}
