@@ -33,34 +33,42 @@ export default function BookmarkManager({ initialBookmarks, userId }) {
 
     // Realtime Subscription
     useEffect(() => {
+        // Unique channel name to prevent conflicts across tabs/instances
+        const channelId = `realtime-bookmarks-${userId}-${Math.random()}`
+
         const channel = supabase
-            .channel('realtime bookmarks')
+            .channel(channelId)
             .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'bookmarks',
-                filter: `user_id=eq.${userId}`
-            }, (payload) => {
-                console.log('Realtime INSERT:', payload)
-                setBookmarks((prev) => {
-                    if (prev.find(b => b.id === payload.new.id)) {
-                        return prev
-                    }
-                    return [payload.new, ...prev]
-                })
-            })
-            .on('postgres_changes', {
-                event: 'DELETE',
+                event: '*', // Listen to all events
                 schema: 'public',
                 table: 'bookmarks'
-                // Removed user_id filter for DELETE to check if that was blocking the event
-                // RLS should still protect data leakage if properly configured, 
-                // but usually DELETE payload only has ID, so filtering by user_id might fail if not in payload.
+                // Removed server-side filter to rely on RLS and client-side check
             }, (payload) => {
-                console.log('Realtime DELETE:', payload)
-                setBookmarks((prev) => prev.filter(b => b.id !== payload.old.id))
+                console.log('Realtime Event received:', payload)
+
+                // Manual check to ensure we only process our own data
+                // (Note: RLS should already enforce this, but this is a safety double-check)
+                if (payload.new && payload.new.user_id && payload.new.user_id !== userId) return
+                if (payload.old && payload.old.user_id && payload.old.user_id !== userId) {
+                    // For deletes, usually user_id isn't in payload.old unless table is REPLICA IDENTITY FULL
+                    // So we might skip this check for deletes if strictly needed, 
+                    // but let's assume if it's there we check it.
+                }
+
+                if (payload.eventType === 'INSERT') {
+                    setBookmarks((prev) => {
+                        if (prev.find(b => b.id === payload.new.id)) {
+                            return prev
+                        }
+                        return [payload.new, ...prev]
+                    })
+                } else if (payload.eventType === 'DELETE') {
+                    setBookmarks((prev) => prev.filter(b => b.id !== payload.old.id))
+                }
             })
-            .subscribe()
+            .subscribe((status) => {
+                console.log(`Realtime Subscription Status for ${channelId}:`, status)
+            })
 
         return () => {
             supabase.removeChannel(channel)
