@@ -75,6 +75,24 @@ npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000).
 
+## Troubleshooting & Recent Fixes
+
+During development, we encountered and resolved several critical issues to ensure a smooth, cross-device experience.
+
+### 1. Bookmark Deletion Failure
+**Issue:** Clicking the delete button did not remove the bookmark from the database.
+**Solution:**
+- Updated the server action `deleteBookmark` to use specific `.eq('id', id).eq('user_id', user.id)` filters instead of `.match()`, ensuring the query correctly targeted the row to delete.
+
+
+### 2. Real-Time Cross-Tab Synchronization
+**Issue:** Adding or deleting a bookmark in one tab updated that tab and mobile devices, but a second open desktop tab would not update without a refresh.
+**Solution:**
+- **Unique Channels:** Assigned a unique channel ID to each tab connection (`realtime-bookmarks-${userId}-${Math.random()}`) to prevent the browser from merging connections and dropping events.
+- **Event Filtering:** Removed restrictive server-side filters for `DELETE` events (as they often lack full row data) and implemented robust client-side filtering to ensure updates are processed correctly.
+- **State Sync:** Added a `useEffect` to sync the local `bookmarks` state whenever the `initialBookmarks` prop updates (triggered by server action revalidation).
+- **Optimistic Updates Removed:** Removed manual optimistic updates to rely entirely on the server's Realtime broadcast, guaranteeing that all tabs remain in perfect sync.
+
 ## 🌍 Deployment on Vercel
 
 1. Push your code to a GitHub repository.
@@ -102,35 +120,4 @@ The application achieves real-time synchronization using Supabase's Realtime cap
     -   **On DELETE**: The bookmark with the matching ID is filtered out of the local state.
 4.  **UI Reflection**: Because React state updates trigger a re-render, and `AnimatePresence` from framer-motion is used, the UI updates instantly with smooth entry/exit animations without needing a page refresh.
 
-## ⚠️ Problems Encountered & Solutions
 
-### 1. Unknown font `Geist` Build Error
-- **Problem**: The initial Next.js boilerplate used a font called `Geist` which was not available in the installed version of Next.js, causing a "Module not found" error.
-- **Solution**: Replaced the `Geist` font import with the standard `Inter` font from `next/font/google` in `app/layout.jsx`. Later, we upgraded the design to use `Outfit` and `Inter`.
-
-### 2. PostCSS Config Syntax Error
-- **Problem**: The `postcss.config.mjs` file (an ES Module) was using CommonJS `module.exports`, causing a `ReferenceError: module is not defined`.
-- **Solution**: Updated the file to use ES Module syntax: `export default { ... }`.
-
-### 3. 500 Internal Server Error & Port Conflicts
-- **Problem**: The development server crashed with a 500 error because multiple instances of Node.js were trying to use port 3000.
-- **Solution**: Used `taskkill /F /IM node.exe` to terminate all zombie Node processes and then restarted the server.
-
-### 4. Missing `autoprefixer` Dependency
-- **Problem**: Tailwind CSS styles were not building correctly because `autoprefixer` was missing from `devDependencies` after migrating the project structure.
-- **Solution**: Installed it via `npm install -D autoprefixer --legacy-peer-deps`.
-
-### 5. Double Loading Spinners
-- **Problem**: Authenticating with Google showed two loading spinners simultaneously—one inside the `Button` component (which auto-detects `disabled` state) and another manually rendered in the `LoginPage`.
-- **Solution**: Refactored the `Button` component to accept a dedicated `loading` prop and updated `LoginPage` to pass the loading state to the button instead of rendering a separate spinner.
-
-### 6. ESLint 9 vs eslint-config-next Version Conflict
-- **Problem**: Deployment failed on Vercel because `eslint-config-next@16` requires `eslint@^9`, but the project had `eslint@^8` installed.
-- **Solution**: Upgraded `eslint` to version `^9` in `package.json` to match the peer dependency requirement.
-
-### 7. Auth Redirect to Localhost in Production
-- **Problem**: After signing in on the deployed Vercel app, users were redirected to `localhost:3000`, causing a "Connection Refused" error.
-- **Solution**:
-    - Created a utility function `getURL()` that dynamically determines the site URL based on environment variables (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_VERCEL_URL`) or defaults to localhost only in development.
-    - Updated `app/login/page.jsx` to use this dynamic URL for the `redirectTo` parameter.
-    - Updated `app/auth/callback/route.js` to correctly handle `x-forwarded-host` headers for proper redirection behind Vercel's proxy.
