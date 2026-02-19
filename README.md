@@ -76,7 +76,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Troubleshooting & Recent Fixes
 
-During development, we encountered and resolved several critical issues to ensure a smooth, cross-device experience.
+During development, I encountered and resolved several critical issues to ensure a smooth, cross-device experience.
 
 ### 1. Authentication Redirect Loop
 **Issue:** Users encountered an infinite redirect loop or were redirected to the homepage instead of the dashboard after Google Sign-In on Vercel.
