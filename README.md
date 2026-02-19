@@ -116,29 +116,6 @@ The application uses **Supabase Auth** with Google OAuth 2.0 for secure, passwor
 - **State Sync:** Added a `useEffect` to sync the local `bookmarks` state whenever the `initialBookmarks` prop updates (triggered by server action revalidation).
 - **Optimistic Updates Removed:** Removed manual optimistic updates to rely entirely on the server's Realtime broadcast, guaranteeing that all tabs remain in perfect sync.
 
-### 3. Authentication Redirect Loop
-**Issue:** Users encountered an infinite redirect loop or were redirected to the homepage instead of the dashboard after Google Sign-In on Vercel.
-**Solution:**
-- **Proxy Handling:** Updated the `auth/callback` route to prioritize the `x-forwarded-host` header over `origin` when constructing the redirect URL. This ensures correct redirection when the app is running behind Vercel's edge proxies.
-- **Dynamic Redirects:** The callback route now dynamically builds the final URL based on the environment (Localhost vs. Production), preventing mismatches between HTTP/HTTPS and domain names.
-
-## 🔐 Authentication Implementation
-
-The application uses **Supabase Auth** with Google OAuth 2.0 for secure, passwordless login.
-
-### Flow Overview
-1. **Client-Side Initiation (`/login`):**
-   - The user clicks "Continue with Google".
-   - `supabase.auth.signInWithOAuth` is called with `redirectTo` set to `[Current-URL]/auth/callback`.
-2. **Supabase Processing:**
-   - Supabase handles the Google consent screen and redirects the user back to the `/auth/callback` route with a temporary `code`.
-3. **Server-Side Exchange (`/auth/callback`):**
-   - The Next.js Route Handler intercepts the request.
-   - It exchanges the `code` for a secure User Session using `supabase.auth.exchangeCodeForSession(code)`.
-   - The session is stored in a secure, HTTP-only cookie.
-4. **Middleware Protection:**
-   - Middleware runs on every request to protected routes (like `/dashboard`).
-   - It verifies the session cookie. Valid sessions are allowed through; invalid sessions are redirected to `/login`.
 
 ## 🌍 Deployment on Vercel
 
