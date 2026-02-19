@@ -19,7 +19,6 @@ A production-ready Smart Bookmark Manager web application where users can log in
 
 ### 1. Clone the repository
 ```bash
-git clone <repository_url>
 cd smart-bookmark-manager
 npm install
 ```
@@ -79,19 +78,67 @@ Open [http://localhost:3000](http://localhost:3000).
 
 During development, we encountered and resolved several critical issues to ensure a smooth, cross-device experience.
 
-### 1. Bookmark Deletion Failure
+### 1. Authentication Redirect Loop
+**Issue:** Users encountered an infinite redirect loop or were redirected to the homepage instead of the dashboard after Google Sign-In on Vercel.
+**Solution:**
+- **Proxy Handling:** Updated the `auth/callback` route to prioritize the `x-forwarded-host` header over `origin` when constructing the redirect URL. This ensures correct redirection when the app is running behind Vercel's edge proxies.
+- **Dynamic Redirects:** The callback route now dynamically builds the final URL based on the environment (Localhost vs. Production), preventing mismatches between HTTP/HTTPS and domain names.
+
+## 🔐 Authentication Implementation
+
+The application uses **Supabase Auth** with Google OAuth 2.0 for secure, passwordless login.
+
+### Flow Overview
+1. **Client-Side Initiation (`/login`):**
+   - The user clicks "Continue with Google".
+   - `supabase.auth.signInWithOAuth` is called with `redirectTo` set to `[Current-URL]/auth/callback`.
+2. **Supabase Processing:**
+   - Supabase handles the Google consent screen and redirects the user back to the `/auth/callback` route with a temporary `code`.
+3. **Server-Side Exchange (`/auth/callback`):**
+   - The Next.js Route Handler intercepts the request.
+   - It exchanges the `code` for a secure User Session using `supabase.auth.exchangeCodeForSession(code)`.
+   - The session is stored in a secure, HTTP-only cookie.
+4. **Middleware Protection:**
+   - Middleware runs on every request to protected routes (like `/dashboard`).
+   - It verifies the session cookie. Valid sessions are allowed through; invalid sessions are redirected to `/login`.
+
+### 2. Bookmark Deletion Failure
 **Issue:** Clicking the delete button did not remove the bookmark from the database.
 **Solution:**
 - Updated the server action `deleteBookmark` to use specific `.eq('id', id).eq('user_id', user.id)` filters instead of `.match()`, ensuring the query correctly targeted the row to delete.
 
 
-### 2. Real-Time Cross-Tab Synchronization
+### 3. Real-Time Cross-Tab Synchronization
 **Issue:** Adding or deleting a bookmark in one tab updated that tab and mobile devices, but a second open desktop tab would not update without a refresh.
 **Solution:**
 - **Unique Channels:** Assigned a unique channel ID to each tab connection (`realtime-bookmarks-${userId}-${Math.random()}`) to prevent the browser from merging connections and dropping events.
 - **Event Filtering:** Removed restrictive server-side filters for `DELETE` events (as they often lack full row data) and implemented robust client-side filtering to ensure updates are processed correctly.
 - **State Sync:** Added a `useEffect` to sync the local `bookmarks` state whenever the `initialBookmarks` prop updates (triggered by server action revalidation).
 - **Optimistic Updates Removed:** Removed manual optimistic updates to rely entirely on the server's Realtime broadcast, guaranteeing that all tabs remain in perfect sync.
+
+### 3. Authentication Redirect Loop
+**Issue:** Users encountered an infinite redirect loop or were redirected to the homepage instead of the dashboard after Google Sign-In on Vercel.
+**Solution:**
+- **Proxy Handling:** Updated the `auth/callback` route to prioritize the `x-forwarded-host` header over `origin` when constructing the redirect URL. This ensures correct redirection when the app is running behind Vercel's edge proxies.
+- **Dynamic Redirects:** The callback route now dynamically builds the final URL based on the environment (Localhost vs. Production), preventing mismatches between HTTP/HTTPS and domain names.
+
+## 🔐 Authentication Implementation
+
+The application uses **Supabase Auth** with Google OAuth 2.0 for secure, passwordless login.
+
+### Flow Overview
+1. **Client-Side Initiation (`/login`):**
+   - The user clicks "Continue with Google".
+   - `supabase.auth.signInWithOAuth` is called with `redirectTo` set to `[Current-URL]/auth/callback`.
+2. **Supabase Processing:**
+   - Supabase handles the Google consent screen and redirects the user back to the `/auth/callback` route with a temporary `code`.
+3. **Server-Side Exchange (`/auth/callback`):**
+   - The Next.js Route Handler intercepts the request.
+   - It exchanges the `code` for a secure User Session using `supabase.auth.exchangeCodeForSession(code)`.
+   - The session is stored in a secure, HTTP-only cookie.
+4. **Middleware Protection:**
+   - Middleware runs on every request to protected routes (like `/dashboard`).
+   - It verifies the session cookie. Valid sessions are allowed through; invalid sessions are redirected to `/login`.
 
 ## 🌍 Deployment on Vercel
 
@@ -108,16 +155,6 @@ During development, we encountered and resolved several critical issues to ensur
 - `middleware.ts`: Authenticated route protection.
 - `components/`: UI components.
 
-## ⚡ Realtime Implementation Explanation
 
-The application achieves real-time synchronization using Supabase's Realtime capabilities, specifically PostgreSQL Change Data Capture (CDC).
-
-**How it works:**
-1.  **Subscription**: In `bookmark-manager.jsx`, we create a subscription to the `bookmarks` table using `supabase.channel()`.
-2.  **Event Listening**: We listen for `postgres_changes` events. Specifically, we filter for `INSERT` and `DELETE` operations where the `user_id` matches the currently logged-in user.
-3.  **State Update**:
-    -   **On INSERT**: The new bookmark payload is immediately prepended to the local `bookmarks` state array.
-    -   **On DELETE**: The bookmark with the matching ID is filtered out of the local state.
-4.  **UI Reflection**: Because React state updates trigger a re-render, and `AnimatePresence` from framer-motion is used, the UI updates instantly with smooth entry/exit animations without needing a page refresh.
 
 
